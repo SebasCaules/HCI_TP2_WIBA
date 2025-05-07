@@ -3,41 +3,78 @@ import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
 export async function GET() {
-    const supabase = createServerComponentClient({ cookies })
+    try {
+        const supabase = createServerComponentClient({ cookies })
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+        const {
+            data: { user },
+        } = await supabase.auth.getUser()
 
-    if (!user) return NextResponse.redirect("/auth/login")
+        if (!user) {
+            return NextResponse.json({ error: "Usuario no autenticado" }, { status: 401 })
+        }
 
-    const [account, transactions, investments, breakdown, contacts, bills] = await Promise.all([
-        supabase.from("accounts").select("balance, currency").eq("user_id", user.id).single(),
-        supabase.from("transactions")
-            .select("id, type, amount, description, date, category_icon, recipient_name")
-            .eq("user_id", user.id)
-            .order("date", { ascending: false }).limit(5),
-        supabase.from("investments")
-            .select("id, total_value, gain, gain_pct")
-            .eq("user_id", user.id).single(),
-        supabase.from("investment_breakdown")
-            .select("investment_id, class, percentage, color"),
-        supabase.from("contacts")
-            .select("name, initials")
-            .eq("user_id", user.id).limit(3),
-        supabase.from("bills")
-            .select("id, title, provider, amount, due_date")
-            .eq("user_id", user.id)
-            .eq("status", "pending")
-            .order("due_date", { ascending: true }).limit(2),
-    ])
+        const [
+            profile,
+            account,
+            transactions,
+            investments,
+            breakdown,
+            contacts,
+            bills
+        ] = await Promise.all([
+            supabase.from("users")
+                .select("first_name, last_name")
+                .eq("id", user.id)
+                .maybeSingle(),
 
-    return NextResponse.json({
-        account: account.data,
-        transactions: transactions.data,
-        investments: investments.data,
-        breakdown: breakdown.data?.filter(b => b.investment_id === investments.data?.id),
-        contacts: contacts.data,
-        bills: bills.data
-    })
+            supabase.from("accounts")
+                .select("balance, currency")
+                .eq("user_id", user.id)
+                .maybeSingle(),
+
+            supabase.from("transactions")
+                .select("id, type, amount, description, date, recipient_name")
+                .eq("user_id", user.id)
+                .order("date", { ascending: false })
+                .limit(5),
+
+            supabase.from("investments")
+                .select("id, total_value, gain, gain_pct")
+                .eq("user_id", user.id)
+                .maybeSingle(),
+
+            supabase.from("investment_breakdown")
+                .select("investment_id, class, percentage, color")
+                .eq("user_id", user.id),
+
+            supabase.from("contacts")
+                .select("name, initials")
+                .eq("user_id", user.id)
+                .limit(3),
+
+            supabase.from("bills")
+                .select("id, title, provider, amount, due_date")
+                .eq("user_id", user.id)
+                .eq("status", "pending")
+                .order("due_date", { ascending: true })
+                .limit(2)
+        ])
+
+        return NextResponse.json({
+            user: {
+                first_name: profile?.data?.first_name || "Nombre",
+                last_name: profile?.data?.last_name || "Apellido"
+            },
+            account: account?.data ?? { balance: 0, currency: "USD" },
+            transactions: transactions?.data ?? [],
+            investments: investments?.data ?? { total_value: 0, gain: 0, gain_pct: 0 },
+            breakdown: breakdown?.data ?? [],
+            contacts: contacts?.data ?? [],
+            bills: bills?.data ?? []
+        })
+    } catch (error) {
+        console.error("Error en GET /api/dashboard:", error)
+        return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 })
+    }
 }

@@ -1,19 +1,39 @@
-// app/api/auth/login/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server"
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
+import { cookies } from "next/headers"
 
 export async function POST(req: NextRequest) {
-    const { email, password } = await req.json();
-    const supabase = await createClient();
+    const supabase = createRouteHandlerClient({ cookies })
+    const body = await req.json()
+    const { email, password } = body
 
     const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password
-    });
+        password,
+    })
 
     if (error) {
-        return NextResponse.json({ error: error.message }, { status: 401 });
+        return NextResponse.json({ success: false, message: error.message }, { status: 401 })
     }
 
-    return NextResponse.json({ message: "Login successful", data });
+    // Guardar nombre de usuario en cookie (si está disponible)
+    const user = data.user
+    const response = NextResponse.json({ success: true })
+
+    if (user) {
+        const name = user.user_metadata.name
+        response.cookies.set("user_name", encodeURIComponent(name), {
+            path: "/",
+            httpOnly: false, // accesible desde el cliente
+        })
+
+        const id = user.id
+        response.cookies.set("user_id", id, {
+            path: "/",
+            httpOnly: false, // accesible desde el cliente
+        })
+    }
+    console.log("Usuario completo:", user)
+
+    return response
 }
