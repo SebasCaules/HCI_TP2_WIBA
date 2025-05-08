@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('');
@@ -17,7 +16,7 @@ export default function ForgotPasswordPage() {
         setErrorMsg('');
         setSuccessMsg('');
 
-        const res = await fetch('/api/auth/forgot-password', {
+        const res = await fetch('/api/profile/auth/forgot-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),

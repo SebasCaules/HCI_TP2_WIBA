@@ -1,18 +1,22 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { User } from "lucide-react"
-import supabase from "@/lib/supabase/client"
+import { User, ChevronRight } from "lucide-react"
+import Link from "next/link"
 
 export default function Topbar() {
     const [username, setUsername] = useState("")
 
     useEffect(() => {
         const getUserData = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (user) {
-                // Podés obtener más datos del perfil si usás una tabla `profiles`
-                setUsername(user.user_metadata?.full_name || user.email)
+            try {
+                const res = await fetch("/api/topbar")
+                const data = await res.json()
+                if (data?.name) {
+                    setUsername(data.name)
+                }
+            } catch (err) {
+                console.error("Error fetching topbar user:", err)
             }
         }
 
@@ -20,11 +24,13 @@ export default function Topbar() {
     }, [])
 
     return (
-        <header className="h-16 border-b px-6 flex items-center justify-end bg-white">
-            <div className="flex items-center gap-2 text-sm text-text-subtle">
+        <header className="h-16 px-6 flex items-center justify-between bg-card border-b">
+            <h1 className="text-xl font-bold text-primary">WIBA</h1>
+            <Link href="/profile" className="flex items-center gap-2 text-sm text-primarytext font-medium">
                 <User className="w-4 h-4" />
                 <span>{username}</span>
-            </div>
+                <ChevronRight className="w-3 h-3" />
+            </Link>
         </header>
     )
 }

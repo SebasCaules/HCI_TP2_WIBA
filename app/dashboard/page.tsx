@@ -11,7 +11,6 @@ import {
     Banknote,
 } from "lucide-react";
 import { Button } from "@/components/ui/button"
-import { Sidebar } from "@/components/shared/sidebar"
 import Link from "next/link"
 import {
     Carousel,
@@ -64,7 +63,6 @@ export default function DashboardPage() {
 
     return (
         <div className="flex min-h-screen bg-surfaces text-primarytext">
-            <Sidebar />
 
             <main className="flex-1 p-8 space-y-8">
 

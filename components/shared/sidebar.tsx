@@ -20,7 +20,6 @@ export function Sidebar() {
 
     return (
         <aside className="w-60 p-6 border-r border-separator">
-            <h1 className="text-xl font-bold text-primary mb-10">WIBA</h1>
             <nav className="space-y-2">
                 {navItems.map(({ label, href, icon: Icon }) => (
                     <Button

@@ -15,7 +15,7 @@ export default function LoginPage() {
         setIsLoading(true);
 
         try {
-            const response = await fetch('/api/auth/login', {
+            const response = await fetch('/api/profile/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export default function LoginPage() {
                 <div className="mt-4 text-center">
                     <p className="text-sm text-secondarytext">
                         ¿No tienes una cuenta?{" "}
-                        <a href="/auth/register" className="text-primary hover:text-hover">
+                        <a href="/profile/auth/register" className="text-primary hover:text-hover">
                             Regístrate
                         </a>
                     </p>

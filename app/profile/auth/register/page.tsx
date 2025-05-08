@@ -49,7 +49,7 @@ export default function RegisterPage() {
 
         setLoading(true)
 
-        const res = await fetch("/api/auth/register", {
+        const res = await fetch("/api/profile/auth/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -67,7 +67,7 @@ export default function RegisterPage() {
         if (!res.ok) {
             // Error handling removed as generalError state was removed
         } else {
-            router.push('/dashboard')
+            router.push('/profile/auth/login')
         }
     }
 
@@ -124,7 +124,7 @@ export default function RegisterPage() {
                 <CardFooter className="flex justify-center">
                     <p className="text-sm text-primarytext">
                         ¿Ya tenés una cuenta?{' '}
-                        <Link href="/auth/login" className="text-primary underline-offset-4 hover:underline">
+                        <Link href="/profile/auth/login" className="text-primary underline-offset-4 hover:underline">
                             Iniciar sesión
                         </Link>
                     </p>

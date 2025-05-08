@@ -39,6 +39,8 @@ export async function POST(req: NextRequest) {
         // 3. Insertar en accounts (account_number se autogenera por trigger)
         const { error: accountError } = await supabase.from("accounts").insert({
             user_id: user.id,
+            balance: 0,
+            currency: "ARS",
         });
 
         if (accountError) {
